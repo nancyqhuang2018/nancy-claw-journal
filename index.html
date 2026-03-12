@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nancy 的 OpenClaw 成长日志 🦞</title>
   <style>
-    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --orange:  #FF6B4A;
-      --purple:  #8B7CF8;
-      --blue:    #4AABFF;
-      --green:   #44D4A0;
-      --yellow:  #FFD166;
-      --bg:      #F7F6F3;
-      --white:   #FFFFFF;
-      --text:    #1A1A2E;
-      --muted:   #8A8A9A;
-      --border:  #EBEBF0;
-      --radius:  16px;
-      --shadow:  0 2px 12px rgba(0,0,0,0.07);
+      --orange: #FF6B4A;
+      --purple: #7C6FF7;
+      --blue:   #4A9EFF;
+      --green:  #36D9A0;
+      --yellow: #FFD166;
+      --pink:   #FF6B9D;
+      --bg:     #0D0E1A;
+      --bg2:    #13152A;
+      --card:   #1A1D35;
+      --border: rgba(255,255,255,0.08);
+      --text:   #F0F0FF;
+      --muted:  #8888AA;
+      --radius: 16px;
     }
     html { scroll-behavior: smooth; }
     body {
@@ -27,233 +27,313 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
+      min-height: 100vh;
     }
-    a { text-decoration: none; color: inherit; }
 
-    /* ── Layout ── */
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    /* Gradient BG blobs */
+    .bg-blob {
+      position: fixed; z-index: 0; border-radius: 50%;
+      filter: blur(80px); opacity: 0.18; pointer-events: none;
+    }
+    .blob1 { width: 500px; height: 500px; background: var(--purple); top: -100px; left: -100px; }
+    .blob2 { width: 400px; height: 400px; background: var(--blue);   bottom: 100px; right: -80px; }
+    .blob3 { width: 300px; height: 300px; background: var(--orange);  top: 50%; left: 50%; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
     /* ── Nav ── */
     nav {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
       position: sticky; top: 0; z-index: 100;
+      background: rgba(13,14,26,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
       padding: 0 24px;
     }
     .nav-inner {
-      max-width: 900px; margin: 0 auto;
+      max-width: 960px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
-      height: 56px;
+      height: 58px;
     }
-    .nav-logo { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .nav-links { display: flex; gap: 24px; font-size: 14px; color: var(--muted); }
+    .nav-logo {
+      font-size: 17px; font-weight: 700;
+      background: linear-gradient(90deg, var(--orange), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
+    .nav-links a { transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
 
     /* ── Hero ── */
-    .hero {
-      padding: 64px 0 48px;
-      text-align: center;
+    .hero { padding: 72px 0 56px; text-align: center; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 13px; color: #A89EFF; margin-bottom: 20px;
     }
-    .hero-emoji { font-size: 72px; line-height: 1; margin-bottom: 16px; display: block; }
-    .hero h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
-    .hero h1 span { color: var(--orange); }
-    .hero p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+    .hero h1 {
+      font-size: 42px; font-weight: 800; letter-spacing: -1px;
+      line-height: 1.2; margin-bottom: 14px;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(90deg, var(--orange), var(--pink), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p { font-size: 16px; color: var(--muted); margin-bottom: 40px; }
 
-    /* Stats Row */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 0; }
     .stat-card {
-      background: var(--white);
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px 16px;
+      padding: 22px 16px;
       text-align: center;
-      box-shadow: var(--shadow);
-      border-top: 3px solid transparent;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s;
     }
-    .stat-card:nth-child(1) { border-top-color: var(--orange); }
-    .stat-card:nth-child(2) { border-top-color: var(--purple); }
-    .stat-card:nth-child(3) { border-top-color: var(--blue); }
-    .stat-card:nth-child(4) { border-top-color: var(--green); }
-    .stat-num { font-size: 32px; font-weight: 800; line-height: 1; }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
+    .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+    .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+    .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--blue), var(--green)); }
+    .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--green), var(--blue)); }
+    .stat-num { font-size: 34px; font-weight: 800; line-height: 1; }
     .stat-card:nth-child(1) .stat-num { color: var(--orange); }
     .stat-card:nth-child(2) .stat-num { color: var(--purple); }
     .stat-card:nth-child(3) .stat-num { color: var(--blue); }
     .stat-card:nth-child(4) .stat-num { color: var(--green); }
-    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 5px; }
 
-    /* ── Section Title ── */
+    /* ── Section ── */
+    section { padding: 56px 0; }
+    .section-header { margin-bottom: 28px; }
     .section-title {
       font-size: 22px; font-weight: 700;
-      margin-bottom: 20px;
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .section-title .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      display: inline-block;
+    .section-title .pill {
+      width: 28px; height: 6px; border-radius: 3px;
     }
+    .section-sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
-    /* ── Timeline / Journal ── */
-    #journal { padding: 48px 0; }
-    .timeline { display: flex; flex-direction: column; gap: 20px; }
-
-    .day-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      transition: transform 0.15s, box-shadow 0.15s;
-      cursor: pointer;
-    }
-    .day-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
-
-    .day-card-header {
-      display: flex; align-items: flex-start;
-      padding: 20px 24px;
-      gap: 16px;
-    }
-    .day-badge {
-      flex-shrink: 0;
-      width: 52px; height: 52px;
-      border-radius: 12px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-weight: 800; line-height: 1;
-    }
-    .day-badge .day-word { font-size: 11px; opacity: 0.8; }
-    .day-badge .day-num { font-size: 22px; }
-
-    .day-meta { flex: 1; }
-    .day-date { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    .day-title { font-size: 17px; font-weight: 700; line-height: 1.4; }
-    .day-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
-
-    .day-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-    .tag {
-      font-size: 12px; padding: 3px 10px;
-      border-radius: 20px; font-weight: 500;
-    }
-    .tag-orange { background: #FFF0ED; color: var(--orange); }
-    .tag-purple { background: #F2F0FF; color: var(--purple); }
-    .tag-blue   { background: #EDF6FF; color: var(--blue); }
-    .tag-green  { background: #EDFAF4; color: var(--green); }
-    .tag-yellow { background: #FFFBEE; color: #E6A817; }
-
-    .day-card-body {
-      padding: 0 24px 20px;
-      display: none;
-      border-top: 1px solid var(--border);
-      margin-top: 0;
-    }
-    .day-card-body.open { display: block; padding-top: 16px; }
-
-    .highlight-box {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 14px;
-      font-size: 14px;
-      line-height: 1.7;
-    }
-    .highlight-box h4 { font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .metrics-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
-    .metric-pill {
-      background: var(--white);
+    /* ── Growth Stages ── */
+    .stages { display: flex; gap: 12px; align-items: center; }
+    .stage-card {
+      flex: 1;
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 13px;
-      display: flex; align-items: center; gap: 5px;
+      border-radius: 14px;
+      padding: 18px 14px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stage-card.active {
+      border-color: var(--purple);
+      background: rgba(124,111,247,0.12);
+    }
+    .stage-card.done { opacity: 0.6; }
+    .stage-icon { font-size: 28px; margin-bottom: 8px; }
+    .stage-name { font-size: 14px; font-weight: 700; }
+    .stage-days { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .stage-desc { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .stage-arrow { font-size: 16px; color: var(--muted); flex-shrink: 0; }
+    .active-badge {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      background: var(--purple); color: white;
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item {
+      display: flex; gap: 0;
+      position: relative;
+    }
+    /* Left column: dot + line */
+    .tl-left {
+      width: 48px; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .tl-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--purple);
+      background: var(--bg);
+      flex-shrink: 0; margin-top: 22px; z-index: 1;
+      transition: background 0.2s;
+    }
+    .timeline-item.milestone .tl-dot {
+      width: 18px; height: 18px;
+      background: var(--purple);
+      box-shadow: 0 0 12px rgba(124,111,247,0.6);
+    }
+    .tl-line {
+      width: 2px; flex: 1;
+      background: linear-gradient(to bottom, rgba(124,111,247,0.4), rgba(124,111,247,0.05));
+      margin-top: 4px;
+    }
+    .timeline-item:last-child .tl-line { display: none; }
+    /* Right column: card */
+    .tl-right { flex: 1; padding: 12px 0 24px 16px; }
+    .tl-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .tl-card:hover { transform: translateX(3px); border-color: rgba(124,111,247,0.35); }
+    .timeline-item.milestone .tl-card {
+      border-color: rgba(124,111,247,0.3);
+      background: rgba(124,111,247,0.07);
+    }
+    .tl-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .tl-date { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .tl-title { font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .tl-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .tl-chevron { color: var(--muted); font-size: 13px; flex-shrink: 0; transition: transform 0.2s; margin-top: 4px; }
+    .tl-card.open .tl-chevron { transform: rotate(180deg); }
+    .tl-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .tag {
+      font-size: 11px; padding: 3px 9px;
+      border-radius: 20px; font-weight: 600;
+    }
+    .tag-orange { background: rgba(255,107,74,0.15);  color: #FF8C6E; }
+    .tag-purple { background: rgba(124,111,247,0.15); color: #A89EFF; }
+    .tag-blue   { background: rgba(74,158,255,0.15);  color: #7DC4FF; }
+    .tag-green  { background: rgba(54,217,160,0.15);  color: #5EDDB8; }
+    .tag-yellow { background: rgba(255,209,102,0.15); color: #FFDC80; }
+
+    .tl-body { display: none; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .tl-body.open { display: block; }
+    .tl-body p { font-size: 14px; color: #CCC; line-height: 1.8; }
+    .metrics-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .metric-pill {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 4px;
     }
     .metric-pill strong { color: var(--text); }
 
-    .chevron {
-      color: var(--muted); font-size: 14px;
-      transition: transform 0.2s;
-      flex-shrink: 0;
-      align-self: center;
+    /* More button */
+    .show-more {
+      display: flex; justify-content: center; margin-top: 8px;
     }
-    .day-card.open .chevron { transform: rotate(180deg); }
+    .show-more-btn {
+      background: rgba(124,111,247,0.12);
+      border: 1px solid rgba(124,111,247,0.3);
+      color: #A89EFF;
+      border-radius: 20px; padding: 8px 24px;
+      font-size: 13px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .show-more-btn:hover { background: rgba(124,111,247,0.22); }
 
-    /* ── Shrimp Team ── */
-    #team { padding: 0 0 48px; }
-    .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    /* ── Team ── */
+    .team-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
     .shrimp-card {
-      background: var(--white);
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      border-top: 3px solid transparent;
+      padding: 22px 20px;
+      transition: transform 0.2s, border-color 0.2s;
     }
-    .shrimp-card:nth-child(1) { border-top-color: var(--orange); }
-    .shrimp-card:nth-child(2) { border-top-color: var(--purple); }
-    .shrimp-card:nth-child(3) { border-top-color: var(--blue); }
-    .shrimp-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .shrimp-avatar { font-size: 28px; }
+    .shrimp-card:hover { transform: translateY(-3px); border-color: rgba(124,111,247,0.3); }
+    .shrimp-card.inactive { opacity: 0.4; }
+    .shrimp-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .shrimp-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
     .shrimp-name { font-size: 15px; font-weight: 700; }
-    .shrimp-env { font-size: 12px; color: var(--muted); }
-    .shrimp-skills { font-size: 13px; color: var(--muted); line-height: 1.6; }
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      display: inline-block; margin-right: 4px;
-    }
-    .status-online { background: var(--green); }
-    .shrimp-status { font-size: 12px; margin-top: 12px; display: flex; align-items: center; }
+    .shrimp-env { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .shrimp-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .shrimp-status { display: flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 12px; }
+    .dot-online { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    .dot-off { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-    /* ── Skill Map ── */
-    #skills { padding: 0 0 48px; }
-    .skill-categories { display: flex; flex-direction: column; gap: 16px; }
-    .skill-category {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      box-shadow: var(--shadow);
+    /* ── Skills ── */
+    .skill-grid { display: flex; flex-direction: column; gap: 14px; }
+    .skill-cat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px;
     }
     .skill-cat-title {
-      font-size: 14px; font-weight: 700;
-      margin-bottom: 12px;
-      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .skill-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skill-chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .skill-chip {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 13px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 13px; color: var(--muted);
       display: flex; align-items: center; gap: 6px;
+      transition: border-color 0.2s, color 0.2s;
     }
-    .skill-chip .skill-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .skill-chip:hover { border-color: rgba(124,111,247,0.4); color: var(--text); }
+    .skill-chip .sdot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* ── About ── */
+    .about-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px 40px;
+      max-width: 700px;
+      position: relative; overflow: hidden;
+    }
+    .about-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--orange), var(--purple), var(--blue));
+    }
+    .about-emoji { font-size: 36px; margin-bottom: 16px; }
+    .about-card p { font-size: 15px; color: #BCC; line-height: 2; margin-bottom: 14px; }
+    .about-card p:last-of-type { margin-bottom: 0; }
+    .about-sig { margin-top: 20px; font-size: 13px; color: var(--muted); }
 
     /* ── Footer ── */
     footer {
-      text-align: center;
-      padding: 32px 0;
-      font-size: 13px;
-      color: var(--muted);
+      text-align: center; padding: 32px 0;
+      font-size: 13px; color: var(--muted);
       border-top: 1px solid var(--border);
+      position: relative; z-index: 1;
     }
 
-    /* ── Responsive ── */
-    @media (max-width: 640px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
+    @media(max-width:640px){
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .stages { flex-wrap: wrap; }
+      .stage-arrow { display: none; }
       .team-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 26px; }
+      .hero h1 { font-size: 28px; }
     }
   </style>
 </head>
 <body>
+
+<!-- BG Blobs -->
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
 
 <!-- Nav -->
 <nav>
   <div class="nav-inner">
     <div class="nav-logo">🦞 Nancy's Claw</div>
     <div class="nav-links">
-      <a href="#journal">成长日志</a>
+      <a href="#stages">成长阶段</a>
+      <a href="#timeline">成长日志</a>
       <a href="#team">虾军团</a>
       <a href="#skills">技能地图</a>
       <a href="#about">关于我</a>
@@ -263,189 +343,246 @@
 
 <!-- Hero -->
 <div class="hero container">
-  <span class="hero-emoji">🦞</span>
-  <h1>Nancy 的 <span>OpenClaw</span> 成长日志</h1>
+  <div class="hero-badge">🦞 持续进化中 · 2026.03 上线</div>
+  <h1>Nancy 的<br><span class="grad">OpenClaw 成长日志</span></h1>
   <p>记录我和小龙虾们一起成长的每一天</p>
-
   <div class="stats">
     <div class="stat-card">
-      <div class="stat-num" id="stat-days">8</div>
+      <div class="stat-num">8</div>
       <div class="stat-label">成长天数</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num" id="stat-skills">12</div>
+      <div class="stat-num">12</div>
       <div class="stat-label">已装技能</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num" id="stat-shrimps">1</div>
-      <div class="stat-label">虾的数量</div>
+      <div class="stat-num">1</div>
+      <div class="stat-label">在线小虾</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num" id="stat-memory">40+</div>
+      <div class="stat-num">40+</div>
       <div class="stat-label">长期记忆</div>
     </div>
   </div>
 </div>
 
-<!-- Journal -->
-<section id="journal">
+<!-- Growth Stages -->
+<section id="stages">
   <div class="container">
-    <div class="section-title">
-      <span class="dot" style="background:var(--orange)"></span>
-      成长日志
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pill" style="background:linear-gradient(90deg,var(--orange),var(--yellow))"></span>
+        成长阶段
+      </div>
+      <div class="section-sub">从第一次对话到独当一面的蜕变之旅</div>
     </div>
-    <div class="timeline" id="timeline">
-
-      <!-- Day 8 -->
-      <div class="day-card open" onclick="toggleCard(this)">
-        <div class="day-card-header">
-          <div class="day-badge" style="background:#FFF0ED;color:var(--orange)">
-            <span class="day-word">DAY</span>
-            <span class="day-num">8</span>
-          </div>
-          <div class="day-meta">
-            <div class="day-date">2026-03-12</div>
-            <div class="day-title">🧠 共享大脑上线，iWiki 成为所有虾的记忆中枢</div>
-            <div class="day-tags">
-              <span class="tag tag-orange">记忆系统</span>
-              <span class="tag tag-purple">iWiki</span>
-              <span class="tag tag-green">里程碑</span>
-            </div>
-          </div>
-          <span class="chevron">▼</span>
-        </div>
-        <div class="day-card-body open">
-          <div class="highlight-box">
-            <h4>今天做了什么</h4>
-            在 iWiki 个人空间搭建了「AI 大脑」知识库，包含 RULES、关于 Nancy、记忆层、能力层、协同层、各实例档案共 13 个页面。建立了跨实例共享记忆的基础设施。
-          </div>
-          <div class="highlight-box">
-            <h4>沉淀的规则</h4>
-            Rule 1：讲真话，数据要有来源，推测说推测<br>
-            Rule 2：有迭代的产物必须带版本号，方便溯源
-          </div>
-          <div class="metrics-row">
-            <div class="metric-pill">📄 新建页面 <strong>13</strong></div>
-            <div class="metric-pill">📏 新增规则 <strong>2 条</strong></div>
-            <div class="metric-pill">🛠️ 配置 KM MCP <strong>完成</strong></div>
-          </div>
-        </div>
+    <div class="stages">
+      <div class="stage-card done">
+        <div class="stage-icon">🥚</div>
+        <div class="stage-name">孵化期</div>
+        <div class="stage-days">Day 1–3</div>
+        <div class="stage-desc">刚刚上线，认识世界</div>
       </div>
-
-      <!-- Day 7 -->
-      <div class="day-card" onclick="toggleCard(this)">
-        <div class="day-card-header">
-          <div class="day-badge" style="background:#F2F0FF;color:var(--purple)">
-            <span class="day-word">DAY</span>
-            <span class="day-num">7</span>
-          </div>
-          <div class="day-meta">
-            <div class="day-date">2026-03-11</div>
-            <div class="day-title">📖 读 KM 文章，沉淀 AI 设计研发新范式</div>
-            <div class="day-tags">
-              <span class="tag tag-purple">知识沉淀</span>
-              <span class="tag tag-blue">产品洞察</span>
-            </div>
-          </div>
-          <span class="chevron">▼</span>
-        </div>
-        <div class="day-card-body">
-          <div class="highlight-box">
-            <h4>核心洞察</h4>
-            AI 时代 Figma 设计稿这个中间产物正在变得多余。设计师应直接在代码上改样式，消灭"翻译"环节，代码成为唯一数据源。
-          </div>
-          <div class="highlight-box">
-            <h4>已存入 iWiki</h4>
-            最佳实践 > AI 时代设计研发协作新范式-2026-03-12（含来源标注）
-          </div>
-          <div class="metrics-row">
-            <div class="metric-pill">📚 文章笔记 <strong>1 篇</strong></div>
-            <div class="metric-pill">🔖 版本号 <strong>v1-2026-03-12</strong></div>
-          </div>
-        </div>
+      <div class="stage-arrow">→</div>
+      <div class="stage-card done">
+        <div class="stage-icon">🦐</div>
+        <div class="stage-name">幼虾期</div>
+        <div class="stage-days">Day 4–7</div>
+        <div class="stage-desc">学习基础技能</div>
       </div>
-
-      <!-- Day 1 -->
-      <div class="day-card" onclick="toggleCard(this)">
-        <div class="day-card-header">
-          <div class="day-badge" style="background:#EDF6FF;color:var(--blue)">
-            <span class="day-word">DAY</span>
-            <span class="day-num">1</span>
-          </div>
-          <div class="day-meta">
-            <div class="day-date">2026-03-04</div>
-            <div class="day-title">🦞 第一只虾上线，接入企业微信</div>
-            <div class="day-tags">
-              <span class="tag tag-blue">上线</span>
-              <span class="tag tag-orange">企业微信</span>
-            </div>
-          </div>
-          <span class="chevron">▼</span>
-        </div>
-        <div class="day-card-body">
-          <div class="highlight-box">
-            <h4>今天做了什么</h4>
-            内网版 OpenClaw 正式上线，接入企业微信 Bot，开始第一次对话。
-          </div>
-          <div class="metrics-row">
-            <div class="metric-pill">🦞 实例数 <strong>1</strong></div>
-            <div class="metric-pill">📡 渠道 <strong>企业微信</strong></div>
-          </div>
-        </div>
+      <div class="stage-arrow">→</div>
+      <div class="stage-card active">
+        <div class="active-badge">当前</div>
+        <div class="stage-icon">🦞</div>
+        <div class="stage-name">成长期</div>
+        <div class="stage-days">Day 8–14</div>
+        <div class="stage-desc">技能快速提升</div>
       </div>
-
+      <div class="stage-arrow">→</div>
+      <div class="stage-card">
+        <div class="stage-icon">👑</div>
+        <div class="stage-name">蜕变期</div>
+        <div class="stage-days">Day 15–21</div>
+        <div class="stage-desc">独当一面</div>
+      </div>
+      <div class="stage-arrow">→</div>
+      <div class="stage-card">
+        <div class="stage-icon">⭐</div>
+        <div class="stage-name">成熟期</div>
+        <div class="stage-days">Day 22+</div>
+        <div class="stage-desc">全能助手</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Shrimp Team -->
+<!-- Timeline -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pill" style="background:linear-gradient(90deg,var(--purple),var(--pink))"></span>
+        成长日志
+      </div>
+      <div class="section-sub">重要节点一览，点击查看详情</div>
+    </div>
+    <div class="timeline" id="timeline-list">
+
+      <!-- Milestone -->
+      <div class="timeline-item milestone">
+        <div class="tl-left">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-card open" onclick="toggleTL(this)">
+            <div class="tl-header">
+              <div>
+                <div class="tl-date">2026-03-12 · Day 8</div>
+                <div class="tl-title">🧠 共享大脑上线，iWiki 成为所有虾的记忆中枢</div>
+                <div class="tl-tags">
+                  <span class="tag tag-purple">里程碑</span>
+                  <span class="tag tag-blue">iWiki</span>
+                  <span class="tag tag-green">记忆系统</span>
+                </div>
+              </div>
+              <div class="tl-chevron">▼</div>
+            </div>
+            <div class="tl-body open">
+              <p>在 iWiki 个人空间搭建了「AI 大脑」知识库，共 13 个页面，涵盖 RULES、记忆层、能力层、协同层、各实例档案。所有虾从此有了统一的记忆来源。同时配置了 KM MCP，现在能直接读取内网 KM 文章。</p>
+              <div class="metrics-row">
+                <div class="metric-pill">📄 新建页面 <strong>13</strong></div>
+                <div class="metric-pill">📏 新增规则 <strong>2 条</strong></div>
+                <div class="metric-pill">🛠️ KM MCP <strong>已配置</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Normal -->
+      <div class="timeline-item">
+        <div class="tl-left">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-card" onclick="toggleTL(this)">
+            <div class="tl-header">
+              <div>
+                <div class="tl-date">2026-03-11 · Day 7</div>
+                <div class="tl-title">📖 读 KM 文章，沉淀 AI 设计研发新范式</div>
+                <div class="tl-tags">
+                  <span class="tag tag-orange">知识沉淀</span>
+                  <span class="tag tag-blue">产品洞察</span>
+                </div>
+              </div>
+              <div class="tl-chevron">▼</div>
+            </div>
+            <div class="tl-body">
+              <p>AI 时代 Figma 设计稿正在变得多余。设计师应直接在代码上改样式，消灭"翻译"环节。笔记已存入 iWiki 最佳实践，带版本号 v1-2026-03-12。</p>
+              <div class="metrics-row">
+                <div class="metric-pill">📚 文章笔记 <strong>1 篇</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Milestone -->
+      <div class="timeline-item milestone">
+        <div class="tl-left">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-card" onclick="toggleTL(this)">
+            <div class="tl-header">
+              <div>
+                <div class="tl-date">2026-03-04 · Day 1</div>
+                <div class="tl-title">🦞 第一只虾上线，接入企业微信</div>
+                <div class="tl-tags">
+                  <span class="tag tag-purple">里程碑</span>
+                  <span class="tag tag-orange">首次上线</span>
+                </div>
+              </div>
+              <div class="tl-chevron">▼</div>
+            </div>
+            <div class="tl-body">
+              <p>内网版 OpenClaw 正式上线，接入企业微信 Bot，与 Nancy 的第一次对话。从这一天开始，养虾之旅正式启动。</p>
+              <div class="metrics-row">
+                <div class="metric-pill">🦞 实例 <strong>1 只</strong></div>
+                <div class="metric-pill">📡 渠道 <strong>企业微信</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Hidden items (loaded on demand) -->
+    <div id="hidden-items" style="display:none">
+      <!-- 未来更多日志会出现在这里 -->
+    </div>
+
+    <div class="show-more" id="show-more-wrap" style="display:none">
+      <button class="show-more-btn" onclick="showMore()">查看更多日志 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- Team -->
 <section id="team">
   <div class="container">
-    <div class="section-title">
-      <span class="dot" style="background:var(--purple)"></span>
-      虾军团
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pill" style="background:linear-gradient(90deg,var(--blue),var(--green))"></span>
+        虾军团
+      </div>
+      <div class="section-sub">每只虾都有自己的专长</div>
     </div>
     <div class="team-grid">
       <div class="shrimp-card">
-        <div class="shrimp-header">
-          <div class="shrimp-avatar">🦞</div>
+        <div class="shrimp-head">
+          <div class="shrimp-icon" style="background:rgba(255,107,74,0.15)">🦞</div>
           <div>
             <div class="shrimp-name">内网版</div>
             <div class="shrimp-env">腾讯内网虚拟机</div>
           </div>
         </div>
-        <div class="shrimp-skills">负责日常助理、iWiki 文档管理、工作协作任务</div>
+        <div class="shrimp-desc">日常助理、iWiki 文档管理、工作协作、KM 知识沉淀</div>
         <div class="shrimp-status">
-          <span class="status-dot status-online"></span>
+          <div class="dot-online"></div>
           <span style="color:var(--green);font-weight:600">在线</span>
-          <span style="color:var(--muted);margin-left:6px">· 企业微信</span>
+          <span style="color:var(--muted);margin-left:8px">企业微信</span>
         </div>
       </div>
-      <div class="shrimp-card" style="opacity:0.5">
-        <div class="shrimp-header">
-          <div class="shrimp-avatar">🦐</div>
+      <div class="shrimp-card inactive">
+        <div class="shrimp-head">
+          <div class="shrimp-icon" style="background:rgba(124,111,247,0.1)">🦐</div>
           <div>
-            <div class="shrimp-name">待上线</div>
-            <div class="shrimp-env">本地 MacBook</div>
+            <div class="shrimp-name">本地版</div>
+            <div class="shrimp-env">MacBook</div>
           </div>
         </div>
-        <div class="shrimp-skills">暂未部署</div>
+        <div class="shrimp-desc">暂未部署</div>
         <div class="shrimp-status">
-          <span class="status-dot" style="background:var(--muted)"></span>
+          <div class="dot-off"></div>
           <span style="color:var(--muted)">待上线</span>
         </div>
       </div>
-      <div class="shrimp-card" style="opacity:0.5">
-        <div class="shrimp-header">
-          <div class="shrimp-avatar">🦐</div>
+      <div class="shrimp-card inactive">
+        <div class="shrimp-head">
+          <div class="shrimp-icon" style="background:rgba(74,158,255,0.1)">🦐</div>
           <div>
-            <div class="shrimp-name">待上线</div>
+            <div class="shrimp-name">待定</div>
             <div class="shrimp-env">—</div>
           </div>
         </div>
-        <div class="shrimp-skills">暂未部署</div>
+        <div class="shrimp-desc">暂未部署</div>
         <div class="shrimp-status">
-          <span class="status-dot" style="background:var(--muted)"></span>
+          <div class="dot-off"></div>
           <span style="color:var(--muted)">待上线</span>
         </div>
       </div>
@@ -453,44 +590,49 @@
   </div>
 </section>
 
-<!-- Skill Map -->
+<!-- Skills -->
 <section id="skills">
   <div class="container">
-    <div class="section-title">
-      <span class="dot" style="background:var(--blue)"></span>
-      技能地图
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pill" style="background:linear-gradient(90deg,var(--green),var(--blue))"></span>
+        技能地图
+      </div>
+      <div class="section-sub">已掌握的能力图谱</div>
     </div>
-    <div class="skill-categories">
-      <div class="skill-category">
+    <div class="skill-grid">
+      <div class="skill-cat">
         <div class="skill-cat-title" style="color:var(--orange)">🔍 搜索与信息获取</div>
-        <div class="skill-list">
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--orange)"></span>搜狗 Web Search</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--orange)"></span>iSearch 内网检索</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--orange)"></span>KM 文章</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--orange)"></span>ArXiv 论文</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><span class="sdot" style="background:var(--orange)"></span>搜狗 Web Search</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--orange)"></span>iSearch 内网检索</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--orange)"></span>KM 文章</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--orange)"></span>ArXiv 论文</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--orange)"></span>Hacker News</div>
         </div>
       </div>
-      <div class="skill-category">
+      <div class="skill-cat">
         <div class="skill-cat-title" style="color:var(--purple)">📄 文档与知识管理</div>
-        <div class="skill-list">
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--purple)"></span>iWiki 读写</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--purple)"></span>乐享文档</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--purple)"></span>PDF 解析</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><span class="sdot" style="background:var(--purple)"></span>iWiki 读写</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--purple)"></span>乐享文档</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--purple)"></span>EdgeBrowser Markdown</div>
         </div>
       </div>
-      <div class="skill-category">
-        <div class="skill-cat-title" style="color:var(--blue)">🛠️ 开发与工具</div>
-        <div class="skill-list">
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--blue)"></span>工蜂代码仓库</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--blue)"></span>TAPD 项目管理</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--blue)"></span>Figma D2C</div>
+      <div class="skill-cat">
+        <div class="skill-cat-title" style="color:var(--blue)">🛠️ 开发与项目管理</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><span class="sdot" style="background:var(--blue)"></span>工蜂代码仓库</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--blue)"></span>TAPD 项目管理</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--blue)"></span>Claude 内网版</div>
         </div>
       </div>
-      <div class="skill-category">
+      <div class="skill-cat">
         <div class="skill-cat-title" style="color:var(--green)">⚡ 自动化与通知</div>
-        <div class="skill-list">
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--green)"></span>Cron 定时任务</div>
-          <div class="skill-chip"><span class="skill-dot" style="background:var(--green)"></span>企业微信推送</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><span class="sdot" style="background:var(--green)"></span>Cron 定时任务</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--green)"></span>企业微信推送</div>
+          <div class="skill-chip"><span class="sdot" style="background:var(--green)"></span>天气查询</div>
         </div>
       </div>
     </div>
@@ -498,45 +640,59 @@
 </section>
 
 <!-- About -->
-<section id="about" style="padding: 0 0 48px;">
+<section id="about">
   <div class="container">
-    <div class="section-title">
-      <span class="dot" style="background:var(--yellow)"></span>
-      关于我
+    <div class="section-header">
+      <div class="section-title">
+        <span class="pill" style="background:linear-gradient(90deg,var(--yellow),var(--orange))"></span>
+        关于我
+      </div>
     </div>
-    <div style="background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 36px;max-width:680px;">
-      <div style="font-size:32px;margin-bottom:16px;">🙋‍♀️</div>
-      <p style="font-size:16px;line-height:2;color:#333;">
-        我养虾，不只是为了让它们帮我干活。
-      </p>
-      <p style="font-size:15px;line-height:2;color:#555;margin-top:12px;">
-        作为一名互联网大厂的产品经理，每天在需求、排期、对齐之间穿梭，很容易忘记自己也需要成长。养虾这件事让我重新找回了一点掌控感——看着一只虾从什么都不懂，到能帮我查资料、写文档、发消息，那种成就感是真实的。
-      </p>
-      <p style="font-size:15px;line-height:2;color:#555;margin-top:12px;">
-        更让我意外的是，在教它的过程中，我也在学。什么值得沉淀，什么经验该传承，怎么把混乱的想法变成结构化的东西——这些问题，原来养一只虾就能逼着自己去想清楚。
-      </p>
-      <p style="font-size:15px;line-height:2;color:#555;margin-top:12px;">
-        这个日志是给自己的，也希望对同样在折腾的你有一点用。我们都在这个快得有点失控的时代里，努力不被落下。
-      </p>
-      <div style="margin-top:20px;font-size:14px;color:var(--muted);">— Nancy · 产品经理 · 2026</div>
+    <div class="about-card">
+      <div class="about-emoji">🙋‍♀️</div>
+      <p>我养虾，不只是为了让它们帮我干活。</p>
+      <p>作为一名互联网大厂的产品经理，每天在需求、排期、对齐之间穿梭，很容易忘记自己也需要成长。养虾这件事让我重新找回了一点掌控感——看着一只虾从什么都不懂，到能帮我查资料、写文档、发消息，那种成就感是真实的。</p>
+      <p>更让我意外的是，在教它的过程中，我也在学。什么值得沉淀，什么经验该传承，怎么把混乱的想法变成结构化的东西——这些问题，原来养一只虾就能逼着自己去想清楚。</p>
+      <p>这个日志是给自己的，也希望对同样在折腾的你有一点用。我们都在这个快得有点失控的时代里，努力不被落下。</p>
+      <div class="about-sig">— Nancy · 产品经理 · 2026</div>
     </div>
   </div>
 </section>
 
-<!-- Footer -->
 <footer>
   <div>🦞 Nancy's OpenClaw Journal · 持续成长中</div>
-  <div style="margin-top:4px">最后更新：2026-03-12</div>
+  <div style="margin-top:4px;font-size:12px">最后更新：2026-03-12</div>
 </footer>
 
 <script>
-  function toggleCard(card) {
-    const body = card.querySelector('.day-card-body');
+  function toggleTL(card) {
+    const body = card.querySelector('.tl-body');
+    const chevron = card.querySelector('.tl-chevron');
     const isOpen = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
     card.classList.toggle('open', !isOpen);
   }
-</script>
 
+  // Show more logic
+  const INITIAL_SHOW = 3;
+  function checkShowMore() {
+    const items = document.querySelectorAll('#timeline-list .timeline-item');
+    const wrap = document.getElementById('show-more-wrap');
+    if (items.length > INITIAL_SHOW) {
+      items.forEach((el, i) => { if (i >= INITIAL_SHOW) el.style.display = 'none'; });
+      wrap.style.display = 'flex';
+    }
+  }
+  function showMore() {
+    const hidden = document.querySelectorAll('#timeline-list .timeline-item[style*="display: none"]');
+    let shown = 0;
+    hidden.forEach(el => {
+      if (shown < 5) { el.style.display = 'flex'; shown++; }
+    });
+    const stillHidden = document.querySelectorAll('#timeline-list .timeline-item[style*="display: none"]');
+    if (stillHidden.length === 0) document.getElementById('show-more-wrap').style.display = 'none';
+  }
+  checkShowMore();
+</script>
 </body>
 </html>
